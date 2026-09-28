@@ -50,7 +50,7 @@ models:
     temperature: 0.6
     sha256: null
   assistant:
-    file: mistral-small-3.1-24b-instruct-2503-q4_k_m.gguf
+    file: https://www.kaggle.com/datasets/harshitshrimal/mistral-small-3-1-24b-gguf?select=mistral-small-3.1-24b-instruct-2503-q4_k_m.gguf
     role: conversation
     agent: assistant
     quant: Q4_K_M

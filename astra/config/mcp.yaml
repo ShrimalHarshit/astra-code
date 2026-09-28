@@ -1,0 +1,26 @@
+# MCP registry TEMPLATE. Seeded into the persistent DB on first boot (DB is the source of truth afterwards).
+# Secrets appear only as ${NAME} references and are resolved at process start from env / Kaggle Secrets.
+# Verify package names/versions before use - MCP server packages move around.
+mcp:
+  filesystem:
+    enabled: true
+    lazy: true
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-filesystem", "${WORKSPACE_ROOT}"]
+    env: {}
+    required_secrets: []
+  github:
+    enabled: false
+    lazy: true
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-github"]
+    env:
+      GITHUB_PERSONAL_ACCESS_TOKEN: "${GITHUB_TOKEN}"
+    required_secrets: [GITHUB_TOKEN]
+  database:
+    enabled: false
+    lazy: true
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-postgres", "${DATABASE_URL}"]
+    env: {}
+    required_secrets: [DATABASE_URL]

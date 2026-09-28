@@ -1,0 +1,65 @@
+# Model registry. Filenames are RELATIVE to models_dir. Swap models by editing this file only.
+# gpu_layers: -1 = everything; `astra benchmark --sweep` measures stable values and writes an overlay
+# (results/best.json + DB) that overrides gpu_layers/context here.
+# NOTE: filenames below are PLACEHOLDERS - match them to the GGUFs in your Kaggle Dataset.
+hermes:
+  host_model: orchestrator    # which registry entry hosts the Hermes tool-call loop for planning-side calls
+models:
+  orchestrator:
+    file: Qwen3.8-27B-Q4_K_M.gguf   # e.g. a Qwen3.x 27B dense quant. (There is no "Qwen2.5 27B".)
+    role: planner
+    agent: orchestrator
+    backend: llama_server       # newest archs (qwen35) often land in llama.cpp before llama-cpp-python wheels
+    quant: Q4_K_M
+    capabilities: [planning, decomposition, routing]
+    context: 16384
+    gpu_layers: -1
+    n_batch: 512
+    flash_attn: true
+    kv_cache_type: f16          # f16 | q8_0 (q8_0 needs flash_attn)
+    extra_args: []              # llama_server only, e.g. ["--jinja"]
+    max_tokens: 2048
+    temperature: 0.2
+    sha256: null
+  engineer:
+    file: webgen-devstral-24b-q4_k_m.gguf
+    role: coding
+    agent: engineer
+    quant: Q4_K_M
+    capabilities: [coding, debugging, repository_analysis, refactoring, filesystem, mcp]
+    context: 16384
+    gpu_layers: -1
+    n_batch: 512
+    flash_attn: true
+    kv_cache_type: f16
+    max_tokens: 3072
+    temperature: 0.15
+    sha256: null
+  logic:
+    file: deepseek-r1-distill-llama-8b-q4_k_m.gguf
+    role: reasoning
+    agent: logic
+    quant: Q4_K_M
+    capabilities: [mathematics, algorithms, formal_reasoning, verification]
+    context: 8192
+    gpu_layers: -1
+    n_batch: 512
+    flash_attn: true
+    kv_cache_type: f16
+    max_tokens: 4096            # R1-distills emit <think> blocks; budget for them
+    temperature: 0.6
+    sha256: null
+  assistant:
+    file: mistral-small-3.1-24b-instruct-2503-q4_k_m.gguf
+    role: conversation
+    agent: assistant
+    quant: Q4_K_M
+    capabilities: [conversation, summarization, communication]
+    context: 16384
+    gpu_layers: -1
+    n_batch: 512
+    flash_attn: true
+    kv_cache_type: f16
+    max_tokens: 2048
+    temperature: 0.4
+    sha256: null

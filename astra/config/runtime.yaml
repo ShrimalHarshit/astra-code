@@ -1,0 +1,58 @@
+# Runtime configuration. NO SECRETS HERE (secrets come from env / Kaggle Secrets).
+work_dir: auto              # auto -> /kaggle/working/astra_work on Kaggle, else ./astra_work
+models_dir: auto            # auto -> scan /kaggle/input/* for the GGUF files named in models.yaml
+backend: llama_cpp          # default backend: llama_cpp | llama_server | mock (per-model override in models.yaml)
+llama_server_bin: auto      # auto -> $LLAMA_SERVER_BIN, PATH, <work_dir>/llama.cpp/build/bin, /kaggle/input/*/llama-server
+cuda_visible_devices: "0"   # single T4 for determinism. Kaggle "T4 x2" would otherwise split layers across both GPUs.
+reserved:
+  vram_mb: 1200             # headroom for CUDA context / compute buffers (subtracted when judging fit)
+  ram_mb: 4000              # OS + Python + MCP + buffers
+vram_release_tolerance_mb: 400
+vram_release_timeout_s: 45
+reuse_same_model: true      # consecutive steps on the same model reuse the live worker (still max ONE model resident)
+timeouts:
+  load_s: 900
+  generate_s: 1200
+oom_retry:
+  max_retries: 2
+  ctx_factor: 0.5
+  layers_factor: 0.75
+  min_ctx: 2048
+step_max_attempts: 2
+persistence:
+  checkpoint_retries: 4
+  checkpoint_backoff_s: 2
+  inline_state_max_bytes: 4000000
+  object_bucket: astra-artifacts
+idle:
+  post_task_wait_s: 60
+  mcp_idle_s: 300
+shutdown:
+  kill_kernel: false        # os._exit() the notebook kernel after cleanup. Does NOT prove the Kaggle VM stops. See README.
+server:
+  host: 0.0.0.0
+  port: 8787
+tools:
+  workspace_root: auto      # auto -> <work_dir>/workspace
+  max_file_bytes: 1000000
+  max_output_bytes: 20000
+  shell_timeout_s: 180
+  allow_python_scripts: false   # true lets the engineer run `python file.py` (= arbitrary code execution in the VM)
+  shell_allow:
+    - [pytest]
+    - [python, -m, pytest]
+    - [python, -m, unittest]
+    - [git]
+    - [ls]
+    - [cat]
+    - [head]
+    - [tail]
+    - [wc]
+    - [grep]
+    - [rg]
+    - [find]
+    - [npm, test]
+    - [make, test]
+agent:
+  max_tool_iterations: 14
+  max_delegations: 3

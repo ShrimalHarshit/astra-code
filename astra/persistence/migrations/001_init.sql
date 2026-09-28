@@ -1,0 +1,18 @@
+CREATE TABLE IF NOT EXISTS schema_migrations (version TEXT PRIMARY KEY, applied_at DOUBLE PRECISION);
+CREATE TABLE IF NOT EXISTS astra_identity (id TEXT PRIMARY KEY, name TEXT, created_at DOUBLE PRECISION, meta TEXT);
+CREATE TABLE IF NOT EXISTS astra_config (key TEXT PRIMARY KEY, value TEXT, updated_at DOUBLE PRECISION);
+CREATE TABLE IF NOT EXISTS sessions (session_id TEXT PRIMARY KEY, started_at DOUBLE PRECISION, ended_at DOUBLE PRECISION, hardware TEXT, boot_report TEXT, status TEXT);
+CREATE TABLE IF NOT EXISTS conversations (msg_id TEXT PRIMARY KEY, session_id TEXT, task_id TEXT, role TEXT, content TEXT, created_at DOUBLE PRECISION);
+CREATE INDEX IF NOT EXISTS idx_conv_session ON conversations (session_id, created_at);
+CREATE TABLE IF NOT EXISTS memories (memory_id TEXT PRIMARY KEY, kind TEXT, scope TEXT, content TEXT, importance DOUBLE PRECISION, source_task_id TEXT, status TEXT, created_at DOUBLE PRECISION, updated_at DOUBLE PRECISION);
+CREATE TABLE IF NOT EXISTS tasks (task_id TEXT PRIMARY KEY, goal TEXT, status TEXT, project_id TEXT, plan TEXT, last_model TEXT, current_step TEXT, created_at DOUBLE PRECISION, updated_at DOUBLE PRECISION, finished_at DOUBLE PRECISION);
+CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks (status);
+CREATE TABLE IF NOT EXISTS task_steps (task_id TEXT, step_id TEXT, agent TEXT, capability TEXT, action TEXT, depends_on TEXT, status TEXT, attempts INTEGER, output TEXT, model_used TEXT, started_at DOUBLE PRECISION, finished_at DOUBLE PRECISION, PRIMARY KEY (task_id, step_id));
+CREATE TABLE IF NOT EXISTS checkpoints (checkpoint_id TEXT PRIMARY KEY, task_id TEXT, seq INTEGER, label TEXT, state TEXT, sha256 TEXT, size_bytes INTEGER, created_at DOUBLE PRECISION);
+CREATE INDEX IF NOT EXISTS idx_ckpt_task ON checkpoints (task_id, seq);
+CREATE TABLE IF NOT EXISTS decisions (decision_id TEXT PRIMARY KEY, task_id TEXT, step_id TEXT, decision TEXT, rationale TEXT, created_at DOUBLE PRECISION);
+CREATE TABLE IF NOT EXISTS mcp_registry (name TEXT PRIMARY KEY, enabled INTEGER, config TEXT, updated_at DOUBLE PRECISION);
+CREATE TABLE IF NOT EXISTS projects (project_id TEXT PRIMARY KEY, name TEXT, root_hint TEXT, metadata TEXT, updated_at DOUBLE PRECISION);
+CREATE TABLE IF NOT EXISTS execution_history (exec_id TEXT PRIMARY KEY, task_id TEXT, step_id TEXT, model TEXT, status TEXT, record TEXT, created_at DOUBLE PRECISION);
+CREATE TABLE IF NOT EXISTS model_metrics (run_id TEXT PRIMARY KEY, model TEXT, quant TEXT, context INTEGER, gpu_layers INTEGER, load_ms DOUBLE PRECISION, prompt_tokens INTEGER, output_tokens INTEGER, prompt_tok_s DOUBLE PRECISION, generation_tok_s DOUBLE PRECISION, vram_peak_mb DOUBLE PRECISION, ram_peak_mb DOUBLE PRECISION, total_ms DOUBLE PRECISION, status TEXT, created_at DOUBLE PRECISION);
+CREATE TABLE IF NOT EXISTS artifacts (artifact_id TEXT PRIMARY KEY, task_id TEXT, name TEXT, storage TEXT, key TEXT, size_bytes INTEGER, sha256 TEXT, created_at DOUBLE PRECISION);

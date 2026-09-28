@@ -148,6 +148,29 @@ class Config:
                         return pathlib.Path(hit).parent
         return self.work_dir / "models"
 
+    def find_model_file(self, name: str):
+        """Locate a GGUF by filename (case-insensitive) in models_dir, then anywhere under /kaggle/input (depth<=6). Cached."""
+        cache = self.__dict__.setdefault("_found", {})
+        if name in cache:
+            return cache[name]
+        hit = None
+        low = name.lower()
+        for root in (self.models_dir, pathlib.Path("/kaggle/input")):
+            if not root.is_dir():
+                continue
+            base = len(root.parts)
+            for dp, dn, fn in os.walk(root, followlinks=True):
+                if len(pathlib.Path(dp).parts) - base > 6:
+                    dn[:] = []
+                    continue
+                hit = next((pathlib.Path(dp) / f for f in fn if f.lower() == low), None)
+                if hit:
+                    break
+            if hit:
+                break
+        cache[name] = hit
+        return hit
+
     def _load_best(self):
         p = self.results_dir / "best.json"
         if p.exists():
@@ -177,7 +200,8 @@ class ModelRegistry:
             raise KeyError(f"unknown model '{key}'")
         s = dict(self.cfg.models[key])
         s["key"] = key
-        s["path"] = str(self.cfg.models_dir / s["file"])
+        found = self.cfg.find_model_file(s["file"])
+        s["path"] = str(found or (self.cfg.models_dir / s["file"]))
         s["backend"] = "mock" if self.cfg["backend"] == "mock" else (s.get("backend") or self.cfg["backend"])  # mock is a global force
         s["n_ctx"] = int(s.get("context", 8192))
         s["n_gpu_layers"] = int(s.get("gpu_layers", -1))

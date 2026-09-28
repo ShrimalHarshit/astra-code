@@ -159,7 +159,7 @@ class MockRunner(BaseRunner):
             elif "<tool_response>" in last:
                 out = json.dumps({"status": "success", "changes": [], "tests": [], "notes": ["mock engineer done"]})
             else:
-                out = '<tool_call>\n{"name": "list_dir", "arguments": {"path": "."}}\n</tool_call>'
+                out = '<tool_call>\n{"name": "list_dir", "arguments": {"path": "."}}\n</tool_call>' 
         elif self.key == "logic":
             out = json.dumps({"answer": "42", "algorithm": "mock", "complexity": "O(1)", "risks": []})
         elif self.key == "assistant":
